@@ -1,0 +1,84 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
+    testCompile group: 'junit', name: 'junit', version: '4.7'
+}
+
+assemble.dependsOn tasks.withType(Jar)
+
+task sourcesJar(type: Jar) {
+    appendix = 'sources'
+    from sourceSets.main.output
+}
+
+task testJar(type: Jar) {
+    appendix = 'test'
+    from sourceSets.test.output
+}
+
+//Excludes Jars from the default java plugin
+jar {
+    exclude 'com/mycomp/foo/spring/**'
+}
+
+task springDbJar(type: Jar) {
+    appendix = 'spring-db'
+    from sourceSets.main.output
+    include 'com/mycomp/foo/spring/db/**'
+}
+
+task springCoreJar(type: Jar) {
+    appendix = 'spring-core'
+    from project.sourceSets.main.output
+    include 'com/mycomp/foo/spring/core/**'
+}
+
+task springMessagingJar(type: Jar) {
+    appendix = 'spring-messaging'
+    from sourceSets.main.output
+    include 'com/mycomp/foo/spring/messaging/**'
+}
+
+//artifacts {
+//    archives sourcesJar, testJar, springDbJar, springCoreJar, springMessagingJar
+//}
+
+repositories {
+    maven {
+        url 'http://gradle.artifactoryonline.com/gradle/demo'
+    }
+}
+
+configurations {
+    spring
+}
+
+dependencies {
+    spring group: 'com.mycomp.spring', name: 'rod', version: '1.0', ext: 'jpg'
+}
+
+def allSpringJars = tasks.withType(Jar).matching { jar -> jar.archiveName.contains('spring') }
+
+allSpringJars.all {
+    metaInf {
+//        from 'src/icons/rod.jpg'
+        from configurations.spring
+    }
+    doLast {
+        ant.checksum(file: archivePath, todir: archivePath.parentFile)
+    }
+}
+
+task springJars(dependsOn: allSpringJars)
+
+// apply from: 'http://github.com/hansd/huglins/raw/master/spring-rule.gradle'
+
+

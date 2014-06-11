@@ -1,0 +1,48 @@
+import groovy.text.SimpleTemplateEngine
+import groovy.text.Template
+import groovy.text.TemplateEngine
+
+task createTests(type: CreateTests) {
+    template = file("src/templates/test.java")
+    packages = 11
+    tests = 21
+    out = new File("src/test/main")
+}
+
+class CreateTests extends DefaultTask {
+    @InputFile
+    File template
+
+    @Input
+    int packages
+
+    @Input
+    int tests
+
+    @OutputDirectory
+    File out
+
+    @TaskAction
+    def create() {
+        project.delete out
+        def engine = new SimpleTemplateEngine()
+        packages.times { packageCounter ->
+            String packageName = "org.gradle.tests$packageCounter"
+            def path = project.mkdir("" + out + "/" + packageName.replace(".", "/"))
+            String extension = template.toString().split("\\.").last()
+            tests.times { testCounter ->
+                writeGeneratedTest(testCounter, packageName, engine, template, project, path, extension)
+            }
+        }
+    }
+
+    def writeGeneratedTest(testCounter, String packageName, SimpleTemplateEngine engine, File template, project, path, extension) {
+        def testName = "Test$testCounter"
+        def binding = [
+                packageName: packageName,
+                testName: testName,
+                sleep: 5
+        ]
+        project.file("$path/${testName}.$extension").text = engine.createTemplate(template).make(binding).toString()
+    }
+}

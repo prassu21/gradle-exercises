@@ -1,0 +1,7 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<testsuite name="org.gradle.tests8.Test7" tests="1" failures="0" errors="0" timestamp="2014-06-03T21:57:29" hostname="localhost" time="0.005">
+  <properties/>
+  <testcase name="myTest" classname="org.gradle.tests8.Test7" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
